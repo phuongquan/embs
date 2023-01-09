@@ -57,6 +57,12 @@ def plot_readings(type):
         range_y=[0,30], 
         markers=True,
         color_discrete_sequence=['darkslategray'])
+    elif type=="tvoc":
+        p = px.line(data,
+        x='Timestamp', y='TVOC',
+        range_y=[0,15], 
+        markers=True,
+        color_discrete_sequence=['black'])
     return p
 
 
@@ -127,6 +133,13 @@ def serve_layout():
                                     ],
                                     className='graph_container',
                                 ),
+                                html.Div(
+                                    [
+                                        dcc.Graph(id='plot-tvoc',
+                                        figure=plot_readings("tvoc"))
+                                    ],
+                                    className='graph_container',
+                                ),
                             ],
                         ),
                         dcc.Tab(
@@ -185,6 +198,14 @@ def serve_layout():
                                                 id='input-pm10',
                                                 type='number',
                                                 step=0.1,
+                                            ),
+                                            html.P(
+                                                'TVOC (mg/m3):',
+                                            ),
+                                            dcc.Input(
+                                                id='input-tvoc',
+                                                type='number',
+                                                step=0.01,
                                             )],
                                             className='input__container',
                                         ),
@@ -250,11 +271,12 @@ app.layout = serve_layout
         State('input-humidity', 'value'),
         State('input-pm25', 'value'),
         State('input-pm10', 'value'),
+        State('input-tvoc', 'value'),
         State('edit-table', 'data')
     ],
     prevent_initial_call=True
 )
-def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_time, input_temperature, input_humidity, input_pm25, input_pm10, table_data):
+def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_time, input_temperature, input_humidity, input_pm25, input_pm10, input_tvoc, table_data):
     triggered_id = ctx.triggered_id
     if triggered_id == 'save-reading':
         new_row = pd.DataFrame({
@@ -262,8 +284,9 @@ def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_tim
                 dt.time.fromisoformat(input_time))],
                 'Temperature': [input_temperature],
                 'Humidity': [input_humidity],
-                'PM2.5': [input_pm25],
-                'PM10': [input_pm10]
+                'PM25': [input_pm25],
+                'PM10': [input_pm10],
+                'TVOC': [input_tvoc]
                 }
             )
         save_manual_readings(pd.concat([load_manual_readings(), new_row]))
