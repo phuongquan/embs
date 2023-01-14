@@ -45,6 +45,12 @@ def plot_readings(type):
         range_y=[0,100], 
         markers=True,
         color_discrete_sequence=['blue'])
+    elif type=="aqi":
+        p = px.line(data,
+        x='Timestamp', y='AQI',
+        range_y=[0,6], 
+        markers=True,
+        color_discrete_sequence=['orange'])
     elif type=="pm25":
         p = px.line(data,
         x='Timestamp', y='PM2.5',
@@ -121,6 +127,13 @@ def serve_layout():
                                 ),
                                 html.Div(
                                     [
+                                        dcc.Graph(id='plot-aqi',
+                                        figure=plot_readings("aqi"))
+                                    ],
+                                    className='graph_container',
+                                ),
+                                html.Div(
+                                    [
                                         dcc.Graph(id='plot-pm25',
                                         figure=plot_readings("pm25"))
                                     ],
@@ -169,39 +182,39 @@ def serve_layout():
                                             className='input__container'                                        
                                         ),
                                         html.Div(children=[
-                                            html.P('Temperature (C): '),
+                                            html.P('Temperature (C):'),
                                             dcc.Input(
                                                 id='input-temperature',
                                                 type='number',
                                                 step=1,
                                                 ),
-                                            html.P(
-                                                'Humidity (%):',
-                                            ),
+                                            html.P('Humidity (%):'),
                                             dcc.Input(
                                                 id='input-humidity',
                                                 type='number',
                                                 step=1,
                                             ),
-                                            html.P(
-                                                'PM2.5 (ug/m3):',
-                                            ),
+                                            html.P('AQI:'),
+                                            dcc.Input(
+                                                id='input-aqi',
+                                                type='number',
+                                                min=1,
+                                                max=5,
+                                                step=1,
+                                                ),
+                                            html.P('PM2.5 (ug/m3):'),
                                             dcc.Input(
                                                 id='input-pm25',
                                                 type='number',
                                                 step=0.1,
                                             ),
-                                            html.P(
-                                                'PM10 (ug/m3):',
-                                            ),
+                                            html.P('PM10 (ug/m3):'),
                                             dcc.Input(
                                                 id='input-pm10',
                                                 type='number',
                                                 step=0.1,
                                             ),
-                                            html.P(
-                                                'TVOC (mg/m3):',
-                                            ),
+                                            html.P('TVOC (mg/m3):'),
                                             dcc.Input(
                                                 id='input-tvoc',
                                                 type='number',
@@ -269,6 +282,7 @@ app.layout = serve_layout
         State('input-time', 'value'),
         State('input-temperature', 'value'),
         State('input-humidity', 'value'),
+        State('input-aqi', 'value'),
         State('input-pm25', 'value'),
         State('input-pm10', 'value'),
         State('input-tvoc', 'value'),
@@ -276,7 +290,7 @@ app.layout = serve_layout
     ],
     prevent_initial_call=True
 )
-def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_time, input_temperature, input_humidity, input_pm25, input_pm10, input_tvoc, table_data):
+def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_time, input_temperature, input_humidity, input_aqi, input_pm25, input_pm10, input_tvoc, table_data):
     triggered_id = ctx.triggered_id
     if triggered_id == 'save-reading':
         new_row = pd.DataFrame({
@@ -284,6 +298,8 @@ def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_tim
                 dt.time.fromisoformat(input_time))],
                 'Temperature': [input_temperature],
                 'Humidity': [input_humidity],
+                'AQI': [input_aqi],
+                'PM10': [input_pm10],
                 'PM2.5': [input_pm25],
                 'PM10': [input_pm10],
                 'TVOC': [input_tvoc]
