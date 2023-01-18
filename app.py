@@ -33,7 +33,11 @@ def save_manual_readings(data):
     return True
 
 def round_up_ten(x):
-    return int(math.ceil(x / 10)) * 10
+    if math.isnan(x) or x==0:
+        retval = 10
+    else:
+        retval = int(math.ceil(x / 10)) * 10
+    return retval
 
 def plot_readings(type):
     data = load_manual_readings()
