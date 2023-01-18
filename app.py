@@ -3,6 +3,7 @@ import dash
 from dash import dcc, html, dash_table, ctx
 from dash.dependencies import Input, Output, State
 import pandas as pd
+import math
 import plotly.express as px
 import requests as req
 import json
@@ -31,12 +32,15 @@ def save_manual_readings(data):
         data = json.dumps(payload))
     return True
 
+def round_up_ten(x):
+    return int(math.ceil(x / 10)) * 10
+
 def plot_readings(type):
     data = load_manual_readings()
     if type=="temperature":
         p = px.line(data,
         x='Timestamp', y='Temperature',
-        range_y=[-5,40], 
+        range_y=[0,50], 
         markers=True,
         color_discrete_sequence=['red'])
     elif type=="humidity":
@@ -48,25 +52,25 @@ def plot_readings(type):
     elif type=="aqi":
         p = px.line(data,
         x='Timestamp', y='AQI',
-        range_y=[0,6], 
+        range_y=[0, round_up_ten(data.max()['AQI'])], 
         markers=True,
         color_discrete_sequence=['orange'])
     elif type=="pm25":
         p = px.line(data,
         x='Timestamp', y='PM2.5',
-        range_y=[0,30], 
+        range_y=[0, round_up_ten(data.max()['PM2.5'])], 
         markers=True,
         color_discrete_sequence=['darkgray'])
     elif type=="pm10":
         p = px.line(data,
         x='Timestamp', y='PM10',
-        range_y=[0,30], 
+        range_y=[0, round_up_ten(data.max()['PM10'])], 
         markers=True,
         color_discrete_sequence=['darkslategray'])
     elif type=="tvoc":
         p = px.line(data,
         x='Timestamp', y='TVOC',
-        range_y=[0,15], 
+        range_y=[0,5], 
         markers=True,
         color_discrete_sequence=['black'])
     return p
@@ -186,38 +190,48 @@ def serve_layout():
                                             dcc.Input(
                                                 id='input-temperature',
                                                 type='number',
+                                                min=0,
+                                                max=50,
                                                 step=1,
                                                 ),
                                             html.P('Humidity (%):'),
                                             dcc.Input(
                                                 id='input-humidity',
                                                 type='number',
+                                                min=0,
+                                                max=90,
                                                 step=1,
                                             ),
                                             html.P('AQI:'),
                                             dcc.Input(
                                                 id='input-aqi',
                                                 type='number',
-                                                min=1,
-                                                max=5,
+                                                min=0,
+                                                max=999,
                                                 step=1,
                                                 ),
                                             html.P('PM2.5 (ug/m3):'),
                                             dcc.Input(
                                                 id='input-pm25',
                                                 type='number',
+                                                min=0,
+                                                max=999,
                                                 step=0.1,
                                             ),
                                             html.P('PM10 (ug/m3):'),
                                             dcc.Input(
                                                 id='input-pm10',
                                                 type='number',
+                                                min=0,
+                                                max=999,
                                                 step=0.1,
                                             ),
                                             html.P('TVOC (mg/m3):'),
                                             dcc.Input(
                                                 id='input-tvoc',
                                                 type='number',
+                                                min=0,
+                                                max=5,
                                                 step=0.01,
                                             )],
                                             className='input__container',
