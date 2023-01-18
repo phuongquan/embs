@@ -8,8 +8,11 @@ import plotly.express as px
 import requests as req
 import json
 import io
+from flask_restful import Api, Resource
+from flask import request
 # store credentials in a file called cred.py in root folder
 import cred
+
 
 def load_manual_readings():
     # get latest version of data from gist
@@ -26,6 +29,27 @@ def save_manual_readings(data):
     payload = {'files': {'manual_readings.csv':{'content':data.to_csv(index=False)}}}
 
     req.patch(url = 'https://api.github.com/gists/e7c8598e3ba54bf86f0586c745026918',
+    headers = dict([('Accept', 'application/vnd.github+json'),
+        ('Authorization', 'Bearer ' + cred.github_pat),
+        ('X-GitHub-Api-Version', '2022-11-28')]),
+        data = json.dumps(payload))
+    return True
+
+def load_enviro_readings():
+    # get latest version of data from gist
+    gist_response = req.get(url='https://api.github.com/gists/b961b551f676f0e7511cfccd475912e9',
+    headers= dict([('Accept', 'application/vnd.github+json'),
+        ('Authorization', 'Bearer ' + cred.github_pat),
+        ('X-GitHub-Api-Version', '2022-11-28')])) 
+        
+    content = gist_response.json()['files']['enviro_readings.csv']['content']
+    csv = pd.read_csv(io.StringIO(content))
+    return csv
+
+def save_enviro_readings(data):
+    payload = {'files': {'enviro_readings.csv':{'content':data.to_csv(index=False)}}}
+
+    req.patch(url = 'https://api.github.com/gists/b961b551f676f0e7511cfccd475912e9',
     headers = dict([('Accept', 'application/vnd.github+json'),
         ('Authorization', 'Bearer ' + cred.github_pat),
         ('X-GitHub-Api-Version', '2022-11-28')]),
@@ -86,6 +110,33 @@ server = app.server
 app.title = 'EMBS Urban Nature Garden'
 app.config.suppress_callback_exceptions = False
 
+api = Api(app.server)
+
+class receive_data(Resource):
+    def post(self):
+        retval = 400
+        reqjson = json.loads(request.data.decode('utf-8'))
+        if reqjson['nickname'] == 'embsgarden':
+            new_row = pd.DataFrame({
+                'timestamp': [dt.datetime.fromisoformat(reqjson['timestamp'])],
+                'temperature': [reqjson['readings']['temperature']],
+                'humidity': [reqjson['readings']['humidity']],
+                'pressure': [reqjson['readings']['pressure']],
+                'noise': [reqjson['readings']['noise']],
+                'pm1': [reqjson['readings']['pm1']],
+                'pm2_5': [reqjson['readings']['pm2_5']],
+                'pm10': [reqjson['readings']['pm10']]
+                })
+            data = pd.concat([load_enviro_readings(), new_row])
+            if save_enviro_readings(data):
+                retval = 200
+        else:
+            # ignore post
+            msg = 'invalid source'
+        return retval
+
+api.add_resource(receive_data, '/envirodata')
+
 def serve_layout():
     return html.Div(
     [
@@ -108,6 +159,17 @@ def serve_layout():
                 ),
             ],
             className='app__header'
+        ),
+        html.Div(
+            [
+                html.Button(
+                    'TEST ENVIRO POST',
+                    id='save-enviro',
+                    className='submit__button',
+                ),
+                html.Span(id='test-output')
+            ],
+            hidden=False
         ),
         html.Div(
             [
@@ -327,6 +389,21 @@ def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_tim
     elif triggered_id == 'save-table':
         save_manual_readings(pd.DataFrame(table_data))
     return '/'
+
+
+@app.callback(
+    Output('test-output', 'children'),
+    Input('save-enviro', 'n_clicks'),
+    prevent_initial_call=True
+)
+def test_enviro(save_enviro_clicks):
+    reading = json.load(open(f"2023-01-08T17_32_33Z.json", "r"))
+    auth = None
+    target = 'http://127.0.0.1:5000/envirodata'
+#    target = 'https://embsgarden.pythonanywhere.com/envirodata'
+    result = req.post(url=target, auth=auth, json=reading)
+    result.close()  
+    return result.status_code
 
 
 if __name__ == '__main__':
