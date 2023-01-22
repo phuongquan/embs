@@ -118,7 +118,7 @@ class receive_data(Resource):
         reqjson = json.loads(request.data.decode('utf-8'))
         if reqjson['nickname'] == 'embsgarden':
             new_row = pd.DataFrame({
-                'timestamp': [dt.datetime.fromisoformat(reqjson['timestamp'])],
+                'timestamp': [reqjson['timestamp']],
                 'temperature': [reqjson['readings']['temperature']],
                 'humidity': [reqjson['readings']['humidity']],
                 'pressure': [reqjson['readings']['pressure']],
@@ -169,7 +169,7 @@ def serve_layout():
                 ),
                 html.Span(id='test-output')
             ],
-            hidden=False
+            hidden=True
         ),
         html.Div(
             [
@@ -399,8 +399,8 @@ def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_tim
 def test_enviro(save_enviro_clicks):
     reading = json.load(open(f"2023-01-08T17_32_33Z.json", "r"))
     auth = None
-    target = 'http://127.0.0.1:5000/envirodata'
-#    target = 'https://embsgarden.pythonanywhere.com/envirodata'
+#    target = 'http://127.0.0.1:5000/envirodata'
+    target = 'https://embsgarden.pythonanywhere.com/envirodata'
     result = req.post(url=target, auth=auth, json=reading)
     result.close()  
     return result.status_code
