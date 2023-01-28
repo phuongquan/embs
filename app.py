@@ -114,26 +114,36 @@ api = Api(app.server)
 
 class receive_data(Resource):
     def post(self):
-        retval = 400
+        response_code = 400
         reqjson = json.loads(request.data.decode('utf-8'))
-        if reqjson['nickname'] == 'embsgarden':
-            new_row = pd.DataFrame({
-                'timestamp': [reqjson['timestamp']],
-                'temperature': [reqjson['readings']['temperature']],
-                'humidity': [reqjson['readings']['humidity']],
-                'pressure': [reqjson['readings']['pressure']],
-                'noise': [reqjson['readings']['noise']],
-                'pm1': [reqjson['readings']['pm1']],
-                'pm2_5': [reqjson['readings']['pm2_5']],
-                'pm10': [reqjson['readings']['pm10']]
-                })
-            data = pd.concat([load_enviro_readings(), new_row])
-            if save_enviro_readings(data):
-                retval = 200
+        # make sure single readings are in a list
+        if type(reqjson) == dict:
+            allreadings = []
+            allreadings.append(reqjson)
         else:
-            # ignore post
-            msg = 'invalid source'
-        return retval
+            allreadings = reqjson
+        # append new readings to existing ones
+        data = load_enviro_readings()
+        for line in allreadings:
+            if line['nickname'] == 'embsgarden':
+                new_row = pd.DataFrame({
+                    'timestamp': [line['timestamp']],
+                    'temperature': [line['readings']['temperature']],
+                    'humidity': [line['readings']['humidity']],
+                    'pressure': [line['readings']['pressure']],
+                    'noise': [line['readings']['noise']],
+                    'pm1': [line['readings']['pm1']],
+                    'pm2_5': [line['readings']['pm2_5']],
+                    'pm10': [line['readings']['pm10']]
+                    })
+                data = pd.concat([data, new_row])
+            else:
+                # ignore post
+                msg = 'invalid source'
+        if save_enviro_readings(data):
+            response_code = 200
+
+        return response_code
 
 api.add_resource(receive_data, '/envirodata')
 
@@ -397,11 +407,31 @@ def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_tim
     prevent_initial_call=True
 )
 def test_enviro(save_enviro_clicks):
-    reading = json.load(open(f"2023-01-08T17_32_33Z.json", "r"))
     auth = None
-#    target = 'http://127.0.0.1:5000/envirodata'
-    target = 'https://embsgarden.pythonanywhere.com/envirodata'
-    result = req.post(url=target, auth=auth, json=reading)
+    target = 'http://127.0.0.1:5000/envirodata'
+#    target = 'https://embsgarden.pythonanywhere.com/envirodata'
+
+#    reading = json.load(open(f"2023-01-08T17_32_33Z.json", "r"))
+#    result = req.post(url=target, auth=auth, json=reading)
+
+    allreadings = []
+    with open(f"2023-01-24.txt", "rt") as f:
+        # get column headings
+        headings = f.readline().rstrip('\n').split(',')
+        # and assume first is timestamp
+        headings.pop(0)
+        for line in f:
+            data = line.rstrip('\n').split(',')
+            readings = {
+                "nickname": "embsgarden",
+                "timestamp": data.pop(0),
+                "readings": dict(zip(headings, data)),
+                "model": "urban",
+                "uid": "e6614103e75c6322"
+            }
+            allreadings.append(readings)
+    result = req.post(url=target, auth=auth, json=allreadings)
+
     result.close()  
     return result.status_code
 
