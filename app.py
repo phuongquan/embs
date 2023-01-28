@@ -389,7 +389,6 @@ def save_changes(submit_reading_clicks, save_table_clicks, input_date, input_tim
                 'Temperature': [input_temperature],
                 'Humidity': [input_humidity],
                 'AQI': [input_aqi],
-                'PM10': [input_pm10],
                 'PM2.5': [input_pm25],
                 'PM10': [input_pm10],
                 'TVOC': [input_tvoc]
