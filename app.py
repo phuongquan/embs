@@ -64,43 +64,146 @@ def round_up_ten(x):
     return retval
 
 def plot_readings(type):
-    data = load_manual_readings()
+    manual = load_manual_readings()
+    manual['Method'] = 'Manual'
+    manual['Timestamp'] = pd.to_datetime(manual['Timestamp'], utc=True)
+    enviro = load_enviro_readings()
+    enviro.rename(columns={
+        'timestamp': 'Timestamp',
+        'temperature': 'Temperature',
+        'humidity': 'Humidity',
+        'pm1': 'PM1',
+        'pm2_5': 'PM2.5',
+        'pm10': 'PM10',
+        'pressure': 'Pressure',
+        'noise': 'Noise'
+        },
+        inplace=True)
+    enviro['Method'] = 'Enviro'
+    enviro['Timestamp'] = pd.to_datetime(enviro['Timestamp'], utc=True)
+    data = pd.concat([manual, enviro])   
+    xrange = [min(data["Timestamp"]) - dt.timedelta(days=1), max(data["Timestamp"]) + dt.timedelta(days=1)]
     if type=="temperature":
-        p = px.line(data,
-        x='Timestamp', y='Temperature',
-        range_y=[0,50], 
-        markers=True,
-        color_discrete_sequence=['red'])
+        p = px.scatter(
+            data,
+            x='Timestamp', y='Temperature',
+            range_x=xrange,
+            range_y=[0,50],
+            color='Method',
+            color_discrete_map={
+                "Manual": "red",
+                "Enviro": "orange"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
     elif type=="humidity":
-        p = px.line(data,
-        x='Timestamp', y='Humidity',
-        range_y=[0,100], 
-        markers=True,
-        color_discrete_sequence=['blue'])
+        p = px.scatter(
+            data,
+            x='Timestamp', y='Humidity',
+            range_x=xrange,
+            range_y=[0,100], 
+            color='Method',
+            color_discrete_map={
+                "Manual": "blue",
+                "Enviro": "cyan"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
+    elif type=="pressure":
+        p = px.scatter(
+            data[data['Method']=='Enviro'],
+            x='Timestamp', y='Pressure',
+            range_x=xrange,
+            range_y=[900, 1100],
+            color='Method',
+            color_discrete_map={
+                "Enviro": "green"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
+    elif type=="noise":
+        p = px.scatter(
+            data[data['Method']=='Enviro'],
+            x='Timestamp', y='Noise',
+            range_x=xrange,
+            range_y=[0, round_up_ten(data.max()['Noise'])],
+            color='Method',
+            color_discrete_map={
+                "Enviro": "brown"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
     elif type=="aqi":
-        p = px.line(data,
-        x='Timestamp', y='AQI',
-        range_y=[0, round_up_ten(data.max()['AQI'])], 
-        markers=True,
-        color_discrete_sequence=['orange'])
+        p = px.scatter(
+            data[data['Method']=='Manual'],
+            x='Timestamp', y='AQI',
+            range_x=xrange,
+            range_y=[0, round_up_ten(data.max()['AQI'])],
+            color='Method',
+            color_discrete_map={
+                "Manual": "orange"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
+    elif type=="pm1":
+        p = px.scatter(
+            data[data['Method']=='Enviro'],
+            x='Timestamp', y='PM1',
+            range_x=xrange,
+            range_y=[0, round_up_ten(data.max()['PM1'])],
+            color='Method',
+            color_discrete_map={
+                "Enviro": "gray"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
     elif type=="pm25":
-        p = px.line(data,
-        x='Timestamp', y='PM2.5',
-        range_y=[0, round_up_ten(data.max()['PM2.5'])], 
-        markers=True,
-        color_discrete_sequence=['darkgray'])
+        p = px.scatter(
+            data,
+            x='Timestamp', y='PM2.5',
+            range_x=xrange,
+            range_y=[0, round_up_ten(data.max()['PM2.5'])], 
+            color='Method',
+            color_discrete_map={
+                "Manual": "darkgray",
+                "Enviro": "gray"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
     elif type=="pm10":
-        p = px.line(data,
-        x='Timestamp', y='PM10',
-        range_y=[0, round_up_ten(data.max()['PM10'])], 
-        markers=True,
-        color_discrete_sequence=['darkslategray'])
+        p = px.scatter(
+            data,
+            x='Timestamp', y='PM10',
+            range_x=xrange,
+            range_y=[0, round_up_ten(data.max()['PM10'])], 
+            color='Method',
+            color_discrete_map={
+                "Manual": "darkslategray",
+                "Enviro": "darkgray"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
     elif type=="tvoc":
-        p = px.line(data,
-        x='Timestamp', y='TVOC',
-        range_y=[0,5], 
-        markers=True,
-        color_discrete_sequence=['black'])
+        p = px.scatter(
+            data[data['Method']=='Manual'],
+            x='Timestamp', y='TVOC',
+            range_x=xrange,
+            range_y=[0, 5],
+            color='Method',
+            color_discrete_map={
+                "Manual": "black"},
+            symbol='Method',
+            symbol_map={
+                "Manual": "hexagram",
+                "Enviro": "cross"})
     return p
 
 
@@ -207,8 +310,29 @@ def serve_layout():
                                 ),
                                 html.Div(
                                     [
+                                        dcc.Graph(id='plot-pressure',
+                                        figure=plot_readings("pressure"))
+                                    ],
+                                    className='graph_container',
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Graph(id='plot-noise',
+                                        figure=plot_readings("noise"))
+                                    ],
+                                    className='graph_container',
+                                ),
+                                html.Div(
+                                    [
                                         dcc.Graph(id='plot-aqi',
                                         figure=plot_readings("aqi"))
+                                    ],
+                                    className='graph_container',
+                                ),
+                                html.Div(
+                                    [
+                                        dcc.Graph(id='plot-pm1',
+                                        figure=plot_readings("pm1"))
                                     ],
                                     className='graph_container',
                                 ),
