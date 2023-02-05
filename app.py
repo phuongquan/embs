@@ -496,7 +496,11 @@ def serve_layout():
 
                                         This kit has been set up to take environmental readings automatically every 15 minutes, 
                                         and to send them to this website when the POKE button is pressed. It requires a wifi 
-                                        or a mobile phone hotspot connection.
+                                        or a mobile phone hotspot connection in order to upload the readings.
+
+                                        The kit has a limited amount of storage space so readings should be uploaded whenever possible.
+                                        It also needs to be checked regularly for failures (see Troubleshooting below).
+                                        
 
                                         #### How to send readings to the website
 
@@ -542,7 +546,7 @@ def serve_layout():
 
                                         ##### What to do if the LED is showing white all the time
 
-                                        Sometimes the Enviro kit crashes, which leaves the LED on white. Press the RESET button to restart it.
+                                        Sometimes the Enviro kit crashes, which leaves the LED constantly on white. Press the RESET button to restart it.
                                         The LED should turn on, pulse, then turn off again.
 
                                         ##### What to do if the LED is blinking red
