@@ -57,7 +57,7 @@ def save_enviro_readings(data):
     return True
 
 def round_up_ten(x):
-    if math.isnan(x) or x==0:
+    if x == None or math.isnan(x) or x==0:
         retval = 10
     else:
         retval = int(math.ceil(x / 10)) * 10
