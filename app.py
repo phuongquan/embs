@@ -454,25 +454,113 @@ def serve_layout():
                             label='EDIT DATA',
                             value='manual-readings-table',
                             children=[
-                                html.Div([
-                                    dash_table.DataTable(
-                                        id='edit-table',
-                                        data=load_manual_readings().to_dict('records'),
-                                        columns=[{'name': i, 'id': i} for i in load_manual_readings().columns],
-                                        editable=True,
-                                        row_deletable=True
-                                    )
-                                ]),
-                                html.Div(id='edit-table-dummy', hidden=True),
                                 html.Div(
                                     [
-                                        html.Button(
-                                            'SAVE CHANGES',
-                                            id='save-table',
-                                            className='submit__button',
+                                        html.Div([
+                                            dash_table.DataTable(
+                                                id='edit-table',
+                                                data=load_manual_readings().to_dict('records'),
+                                                columns=[{'name': i, 'id': i} for i in load_manual_readings().columns],
+                                                editable=True,
+                                                row_deletable=True
+                                            )
+                                        ]),
+                                        html.Div(id='edit-table-dummy', hidden=True),
+                                        html.Div(
+                                            [
+                                                html.Button(
+                                                    'SAVE CHANGES',
+                                                    id='save-table',
+                                                    className='submit__button',
+                                                )
+                                            ]
                                         )
-                                    ]
-                                ),
+                                    ],
+                                    className='container__1',
+                                )
+                            ],
+                        ),
+                        dcc.Tab(
+                            label='INSTRUCTIONS',
+                            value='instructions',
+                            children=[
+                                html.Div(
+                                    [
+                                        dcc.Markdown('''
+
+                                        This website has been created for Science Together: Oxford Researchers and Communities 2022/23.
+                                        The code is openly available at <https://github.com/phuongquan/embs> and <https://github.com/phuongquan/enviro>
+
+
+                                        ### Enviro Urban Raspberry Pi Pico kit
+
+                                        This kit has been set up to take environmental readings automatically every 15 minutes, 
+                                        and to send them to this website when the POKE button is pressed. It requires a wifi 
+                                        or a mobile phone hotspot connection.
+
+                                        #### How to send readings to the website
+
+                                        The Enviro kit should already be set up to send readings using a particular mobile hotspot.
+                                        
+                                        1. Turn on the mobile hotspot
+                                        1. Press the POKE button on the Enviro kit
+                                        1. Wait for the LED to finish pulsing with a white light
+                                        1. Check the new readings are showing in the Graphs tab
+
+                                        If the LED blinks red, an error has occurred. Check the hotspot is live by seeing if it can be found by a different device.
+                                        Try again by pressing the RESET button, wait for the LED to stop pulsing, then press the POKE button again.
+
+                                        #### How to connect to a different mobile hotspot
+
+                                        As well as a smartphone that will act as the hotspot, you need to have a second device (smartphone, tablet or laptop) 
+                                        which will be used to update the connection settings on the Enviro kit.
+
+                                        NOTE: The name and the password of the hotspot must *not* contain any special characters such as dashes (-) or apostrophes ('),
+                                        though underscores (_) are ok. If the name or password contains any special characters, these need to be removed first.
+                                        On an iPhone, the name of the hotspot may be based on the name of the device, so to change this you may need to update the name of the device in Settings.
+
+                                        1. Turn on the mobile hotspot 
+                                        1. On the Enviro kit, while holding down the POKE button, press and release the RESET button, and continue holding down the POKE button until the LED blinks fast.
+                                        This means the kit has entered "Provisioning mode", and its settings can be updated.
+                                        1. On the second device, view the available Wifi networks.
+                                        1. Connect to the "Enviro Urban Setup" network
+                                        1. An introduction screen should pop up automatically. Follow the instructions to get to the Networking screen. 
+                                        Do not change the nickname of the board or any of the other settings otherwise it might stop working!
+                                        1. On the Networking screen, select the name of the hotspot and enter the password.
+                                        If the hotspot is not in the list of available networks, check it is live by seeing if it can be found by a different device, then click "Try scanning again".
+                                        1. Click through the rest of the screens
+                                        1. On the final screen there is a "Reset the board" button. When you click on this, the LED on the Enviro kit should pulse for a few seconds then turn off.
+                                        If the LED flashes red, try to follow these instructions again from the beginning.
+                                        If it still flases red, try to connect to a different mobile hotspot
+                                        If that still doesn't work, open an issue at <https://github.com/phuongquan/embs/issues>
+                                        1. If all seems well, press the POKE button to send the latest readings to the website
+                                        
+                                        #### Troubleshooting
+
+                                        If all is working correctly, the LED will ordinarily be off. 
+                                        A few times an hour, when the kit wakes itself up to take a reading, the LED will turn white, pulse for a few seconds, then turn off again.
+
+                                        ##### What to do if the LED is showing white all the time
+
+                                        Sometimes the Enviro kit crashes, which leaves the LED on white. Press the RESET button to restart it.
+                                        The LED should turn on, pulse, then turn off again.
+
+                                        ##### What to do if the LED is blinking red
+
+                                        If there has been an error, the LED will blink red. 
+                                        Make sure the mobile hotspot is active, then press the RESET button on the Enviro kit to restart it.
+                                        Hopefully, the LED should turn on, pulse, then turn off again. 
+                                        If it starts blinking red again then open an issue at <https://github.com/phuongquan/embs/issues>
+
+                                        ##### What to do if the LED doesn't light up
+
+                                        If you have pressed the POKE or RESET button on the Enviro kit, and the LED doesn't light up, it may be that the batteries have run out.
+                                        Check the switch on the battery pack is set to On. If the RESET button still doesn't light up the LED, try changing the batteries.
+
+                                        ''')
+                                    ],
+                                    className='container__1'
+                                )
                             ],
                         )
                     ],
