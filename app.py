@@ -299,63 +299,63 @@ def serve_layout():
                                         dcc.Graph(id='plot-temperature',
                                         figure=plot_readings("temperature"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-humidity',
                                         figure=plot_readings("humidity"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pressure',
                                         figure=plot_readings("pressure"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-noise',
                                         figure=plot_readings("noise"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-aqi',
                                         figure=plot_readings("aqi"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pm1',
                                         figure=plot_readings("pm1"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pm25',
                                         figure=plot_readings("pm25"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pm10',
                                         figure=plot_readings("pm10"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-tvoc',
                                         figure=plot_readings("tvoc"))
                                     ],
-                                    className='graph_container',
+                                    className='graph__container',
                                 ),
                             ],
                         ),
@@ -488,13 +488,18 @@ def serve_layout():
                                     [
                                         dcc.Markdown('''
 
-                                        This website has been created for Science Together: Oxford Researchers and Communities 2022/23.
-                                        The code is openly available at <https://github.com/phuongquan/embs> and <https://github.com/phuongquan/enviro>
-
-
                                         ### Enviro Urban Raspberry Pi Pico kit
 
-                                        This kit has been set up to take environmental readings automatically every 15 minutes, 
+                                        '''),
+                                        html.Span(children=[
+                                            html.Img(src='assets/enclosure.jpg', 
+                                            style={'padding': 10, 'width': '200px'}),
+                                            html.Img(src='assets/kit.jpg', 
+                                            style={'padding': 10, 'width': '200px'}),
+                                        ]),
+                                        dcc.Markdown('''
+
+                                        This kit has been set up to take environmental readings automatically every hour, 
                                         and to send them to this website when the POKE button is pressed. It requires a wifi 
                                         or a mobile phone hotspot connection in order to upload the readings.
 
@@ -504,19 +509,30 @@ def serve_layout():
 
                                         #### How to send readings to the website
 
-                                        The Enviro kit should already be set up to send readings using a particular mobile hotspot.
-                                        
-                                        1. Turn on the mobile hotspot
-                                        1. Press the POKE button on the Enviro kit
-                                        1. Wait for the LED to finish pulsing with a white light
-                                        1. Check the new readings are showing in the Graphs tab
+                                        The Enviro kit has been set up to send readings only when it is prompted to, and when using a specific mobile hotspot.
 
-                                        If the LED blinks red, an error has occurred. Check the hotspot is live by seeing if it can be found by a different device.
-                                        Try again by pressing the RESET button, wait for the LED to stop pulsing, then press the POKE button again.
+                                        '''),
+                                        html.Span(children=[
+                                            html.Img(src='assets/poke_button.jpg', 
+                                            style={'padding': 10, 'width': '200px'}),
+                                            html.Img(src='assets/reset_button.jpg', 
+                                            style={'padding': 10, 'width': '200px'}),
+                                        ]),
+                                        dcc.Markdown('''
+                                                                                
+                                        1. Turn on the mobile hotspot
+                                        2. Remove the Enviro kit from the enclosure
+                                        1. Press the POKE button on the Enviro kit
+                                        1. Wait for the white LED to finish pulsing
+                                        1. Check the new readings are showing in the Graphs tab
+                                        1. Put it back in the enclosure
+
+                                        If the red LED blinks, an error has occurred. Check the hotspot is live by seeing if it can be found by a different device.
+                                        Try again by pressing the RESET button, wait for the white LED to stop pulsing, then press the POKE button again.
 
                                         #### How to connect to a different mobile hotspot
 
-                                        As well as a smartphone that will act as the hotspot, you need to have a second device (smartphone, tablet or laptop) 
+                                        As well as the smartphone that will act as the hotspot, you need to have a second device (smartphone, tablet or laptop) 
                                         which will be used to update the connection settings on the Enviro kit.
 
                                         NOTE: The name and the password of the hotspot must *not* contain any special characters such as dashes (-) or apostrophes ('),
@@ -524,42 +540,42 @@ def serve_layout():
                                         On an iPhone, the name of the hotspot may be based on the name of the device, so to change this you may need to update the name of the device in Settings.
 
                                         1. Turn on the mobile hotspot 
-                                        1. On the Enviro kit, while holding down the POKE button, press and release the RESET button, and continue holding down the POKE button until the LED blinks fast.
-                                        This means the kit has entered "Provisioning mode", and its settings can be updated.
-                                        1. On the second device, view the available Wifi networks.
+                                        1. On the Enviro kit, while holding down the POKE button, press and release the RESET button, and continue holding down the POKE button until the white LED blinks fast.
+                                        This means the kit has entered "Provisioning mode", and its settings can be updated
+                                        1. On the second device, view the available Wifi networks
                                         1. Connect to the "Enviro Urban Setup" network
                                         1. An introduction screen should pop up automatically. Follow the instructions to get to the Networking screen. 
                                         Do not change the nickname of the board or any of the other settings otherwise it might stop working!
-                                        1. On the Networking screen, select the name of the hotspot and enter the password.
+                                        1. On the Networking screen, select the name of the hotspot and enter the password
                                         If the hotspot is not in the list of available networks, check it is live by seeing if it can be found by a different device, then click "Try scanning again".
                                         1. Click through the rest of the screens
-                                        1. On the final screen there is a "Reset the board" button. When you click on this, the LED on the Enviro kit should pulse for a few seconds then turn off.
-                                        If the LED flashes red, try to follow these instructions again from the beginning.
-                                        If it still flases red, try to connect to a different mobile hotspot
+                                        1. On the final screen there is a "Reset the board" button. When you click on this, the white LED on the Enviro kit should pulse for a few seconds then turn off.
+                                        If the red LED flashes, try to follow these instructions again from the beginning.
+                                        If it still flashes red, try to connect to a different mobile hotspot.
                                         If that still doesn't work, open an issue at <https://github.com/phuongquan/embs/issues>
                                         1. If all seems well, press the POKE button to send the latest readings to the website
                                         
                                         #### Troubleshooting
 
-                                        If all is working correctly, the LED will ordinarily be off. 
-                                        A few times an hour, when the kit wakes itself up to take a reading, the LED will turn white, pulse for a few seconds, then turn off again.
+                                        If all is working correctly, the LEDs will ordinarily be off. 
+                                        When the kit wakes itself up to take a reading, the white LED will turn on, pulse for a few seconds, then turn off again.
 
-                                        ##### What to do if the LED is showing white all the time
+                                        ##### What to do if the white LED is on constantly
 
-                                        Sometimes the Enviro kit crashes, which leaves the LED constantly on white. Press the RESET button to restart it.
+                                        Sometimes the Enviro kit crashes, which leaves the white LED on constantly. Press the RESET button to restart the kit.
                                         The LED should turn on, pulse, then turn off again.
 
-                                        ##### What to do if the LED is blinking red
+                                        ##### What to do if the red LED is blinking
 
-                                        If there has been an error, the LED will blink red. 
+                                        If there has been an error, the red LED will blink. 
                                         Make sure the mobile hotspot is active, then press the RESET button on the Enviro kit to restart it.
-                                        Hopefully, the LED should turn on, pulse, then turn off again. 
-                                        If it starts blinking red again then open an issue at <https://github.com/phuongquan/embs/issues>
+                                        Hopefully, the white LED should turn on, pulse, then turn off again. 
+                                        If the red LED starts blinking again, open an issue at <https://github.com/phuongquan/embs/issues>
 
-                                        ##### What to do if the LED doesn't light up
+                                        ##### What to do if the white LED doesn't light up
 
-                                        If you have pressed the POKE or RESET button on the Enviro kit, and the LED doesn't light up, it may be that the batteries have run out.
-                                        Check the switch on the battery pack is set to On. If the RESET button still doesn't light up the LED, try changing the batteries.
+                                        If you have pressed the POKE or RESET button on the Enviro kit, and the white LED doesn't light up, it may be that the batteries have run out.
+                                        Check the switch on the battery pack is set to On. If pressing the RESET button still doesn't light up the LED, try changing the batteries.
 
                                         ''')
                                     ],
@@ -571,6 +587,15 @@ def serve_layout():
                 )
             ],
             className='tabs__container',
+        ),
+        html.Div(
+            [
+                dcc.Markdown('''
+                    This website has been created for Science Together: Oxford Researchers and Communities 2022/23.
+                    The code is openly available at <https://github.com/phuongquan/embs> and <https://github.com/phuongquan/enviro>                
+                ''')
+            ],
+            className='app__footer',
         ),
     ],
     className='app__container',
