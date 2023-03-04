@@ -29,6 +29,7 @@ def load_manual_readings():
         ('X-GitHub-Api-Version', '2022-11-28')])) 
         
     content = gist_response.json()['files']['manual_readings.csv']['content']
+
     csv = pd.read_csv(io.StringIO(content))
     log_message('load_manual_readings end')
     return csv
@@ -70,20 +71,9 @@ def save_enviro_readings(data):
     log_message('save_enviro_readings end')
     return True
 
-def round_up_ten(x):
-    if x == None or math.isnan(x) or x==0:
-        retval = 10
-    else:
-        retval = int(math.ceil(x / 10)) * 10
-        # TODO: if x is a multiple of 10, return x+10. Negative numbers?
-    return retval
-
-def plot_readings(type):
-    log_message('plot_readings start' + ': ' + type)
-    manual = load_manual_readings()
+def combine_readings(manual, enviro):
     manual['Method'] = 'Manual'
     manual['Timestamp'] = pd.to_datetime(manual['Timestamp'], utc=True)
-    enviro = load_enviro_readings()
     enviro.rename(columns={
         'timestamp': 'Timestamp',
         'temperature': 'Temperature',
@@ -98,6 +88,18 @@ def plot_readings(type):
     enviro['Method'] = 'Enviro'
     enviro['Timestamp'] = pd.to_datetime(enviro['Timestamp'], utc=True)
     data = pd.concat([manual, enviro])   
+    return data
+
+def round_up_ten(x):
+    if x == None or math.isnan(x) or x==0:
+        retval = 10
+    else:
+        retval = int(math.ceil(x / 10)) * 10
+        # TODO: if x is a multiple of 10, return x+10. Negative numbers?
+    return retval
+
+def plot_readings(type, data):
+    log_message('plot_readings start' + ': ' + type)
     xrange = [min(data["Timestamp"]) - dt.timedelta(days=1), max(data["Timestamp"]) + dt.timedelta(days=1)]
     if type=="temperature":
         p = px.scatter(
@@ -268,6 +270,9 @@ class receive_data(Resource):
 api.add_resource(receive_data, '/envirodata')
 
 def serve_layout():
+    manual_readings = load_manual_readings()
+    enviro_readings = load_enviro_readings()
+    combined_readings = combine_readings(manual_readings, enviro_readings)
     return html.Div(
     [
         dcc.Location(id='url'),
@@ -314,63 +319,63 @@ def serve_layout():
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-temperature',
-                                        figure=plot_readings("temperature"))
+                                        figure=plot_readings("temperature", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-humidity',
-                                        figure=plot_readings("humidity"))
+                                        figure=plot_readings("humidity", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pressure',
-                                        figure=plot_readings("pressure"))
+                                        figure=plot_readings("pressure", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-noise',
-                                        figure=plot_readings("noise"))
+                                        figure=plot_readings("noise", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-aqi',
-                                        figure=plot_readings("aqi"))
+                                        figure=plot_readings("aqi", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pm1',
-                                        figure=plot_readings("pm1"))
+                                        figure=plot_readings("pm1", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pm25',
-                                        figure=plot_readings("pm25"))
+                                        figure=plot_readings("pm25", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-pm10',
-                                        figure=plot_readings("pm10"))
+                                        figure=plot_readings("pm10", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
                                 html.Div(
                                     [
                                         dcc.Graph(id='plot-tvoc',
-                                        figure=plot_readings("tvoc"))
+                                        figure=plot_readings("tvoc", combined_readings))
                                     ],
                                     className='graph__container',
                                 ),
@@ -476,8 +481,8 @@ def serve_layout():
                                         html.Div([
                                             dash_table.DataTable(
                                                 id='edit-table',
-                                                data=load_manual_readings().to_dict('records'),
-                                                columns=[{'name': i, 'id': i} for i in load_manual_readings().columns],
+                                                data=manual_readings.to_dict('records'),
+                                                columns=[{'name': i, 'id': i} for i in manual_readings.columns],
                                                 editable=True,
                                                 row_deletable=True
                                             )
