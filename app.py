@@ -609,7 +609,7 @@ def serve_layout():
             [
                 dcc.Markdown('''
                     This website has been created for Science Together: Oxford Researchers and Communities 2022/23.
-                    The code is openly available at <https://github.com/phuongquan/embs> and <https://github.com/phuongquan/enviro>                
+                    The code is openly available at <https://github.com/phuongquan/embs> and <https://github.com/phuongquan/enviro/tree/upload_on_poke>                
                 ''')
             ],
             className='app__footer',
