@@ -13,8 +13,15 @@ from flask import request
 # store credentials in a file called cred.py in root folder
 import cred
 
+log_activity = True
+
+def log_message(msg):
+    if log_activity:
+        with open('log.txt', 'a') as f:
+            f.write(str(dt.datetime.now()) + ': ' + msg + '\n')
 
 def load_manual_readings():
+    log_message('load_manual_readings start')
     # get latest version of data from gist
     gist_response = req.get(url='https://api.github.com/gists/e7c8598e3ba54bf86f0586c745026918',
     headers= dict([('Accept', 'application/vnd.github+json'),
@@ -23,9 +30,11 @@ def load_manual_readings():
         
     content = gist_response.json()['files']['manual_readings.csv']['content']
     csv = pd.read_csv(io.StringIO(content))
+    log_message('load_manual_readings end')
     return csv
 
 def save_manual_readings(data):
+    log_message('save_manual_readings start')
     payload = {'files': {'manual_readings.csv':{'content':data.to_csv(index=False)}}}
 
     req.patch(url = 'https://api.github.com/gists/e7c8598e3ba54bf86f0586c745026918',
@@ -33,9 +42,11 @@ def save_manual_readings(data):
         ('Authorization', 'Bearer ' + cred.github_pat),
         ('X-GitHub-Api-Version', '2022-11-28')]),
         data = json.dumps(payload))
+    log_message('save_manual_readings end')
     return True
 
 def load_enviro_readings():
+    log_message('load_enviro_readings start')
     # get latest version of data from gist
     gist_response = req.get(url='https://api.github.com/gists/b961b551f676f0e7511cfccd475912e9',
     headers= dict([('Accept', 'application/vnd.github+json'),
@@ -44,9 +55,11 @@ def load_enviro_readings():
         
     content = gist_response.json()['files']['enviro_readings.csv']['content']
     csv = pd.read_csv(io.StringIO(content))
+    log_message('load_enviro_readings end')
     return csv
 
 def save_enviro_readings(data):
+    log_message('save_enviro_readings start')
     payload = {'files': {'enviro_readings.csv':{'content':data.to_csv(index=False)}}}
 
     req.patch(url = 'https://api.github.com/gists/b961b551f676f0e7511cfccd475912e9',
@@ -54,6 +67,7 @@ def save_enviro_readings(data):
         ('Authorization', 'Bearer ' + cred.github_pat),
         ('X-GitHub-Api-Version', '2022-11-28')]),
         data = json.dumps(payload))
+    log_message('save_enviro_readings end')
     return True
 
 def round_up_ten(x):
@@ -61,9 +75,11 @@ def round_up_ten(x):
         retval = 10
     else:
         retval = int(math.ceil(x / 10)) * 10
+        # TODO: if x is a multiple of 10, return x+10. Negative numbers?
     return retval
 
 def plot_readings(type):
+    log_message('plot_readings start' + ': ' + type)
     manual = load_manual_readings()
     manual['Method'] = 'Manual'
     manual['Timestamp'] = pd.to_datetime(manual['Timestamp'], utc=True)
@@ -204,6 +220,7 @@ def plot_readings(type):
             symbol_map={
                 "Manual": "hexagram",
                 "Enviro": "cross"})
+    log_message('plot_readings end')
     return p
 
 
