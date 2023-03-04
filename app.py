@@ -94,8 +94,7 @@ def round_up_ten(x):
     if x == None or math.isnan(x) or x==0:
         retval = 10
     else:
-        retval = int(math.ceil(x / 10)) * 10
-        # TODO: if x is a multiple of 10, return x+10. Negative numbers?
+        retval = int(math.ceil((x + 1) / 10)) * 10
     return retval
 
 def plot_readings(type, data):
@@ -106,7 +105,7 @@ def plot_readings(type, data):
             data,
             x='Timestamp', y='Temperature',
             range_x=xrange,
-            range_y=[0,50],
+            range_y=[-10,50],
             color='Method',
             color_discrete_map={
                 "Manual": "red",
