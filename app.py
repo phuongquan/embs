@@ -13,7 +13,7 @@ from flask import request
 # store credentials in a file called cred.py in root folder
 import cred
 
-log_activity = True
+log_activity = False
 
 def log_message(msg):
     if log_activity:
